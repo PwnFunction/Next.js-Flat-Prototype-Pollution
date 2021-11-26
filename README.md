@@ -56,7 +56,7 @@ Requires 2 stages to poision the server-side code with our payload because AMP c
 Once it's poisioned any single subsequent request will trigger XSS on any session as the server-side code is poisioned via prototype pollution.
 
 ```js
-// next/server/render.tsx
+/* next/server/render.tsx */
 const ampState = {
   ampFirst: pageConfig.amp === true,
   hasQuery: Boolean(query.amp),
@@ -66,18 +66,18 @@ const inAmpMode = !process.browser && (0, _amp).isInAmpMode(ampState); // isInAm
 // ...
 html = await optimizeAmp(html, renderOpts.ampOptimizerConfig);
 
-// next/server/optimize-amp.ts
+/* next/server/optimize-amp.ts */
 const optimizer = AmpOptimizer.create(config);
 return optimizer.transformHtml(html, config); // config.ampUrlPrefix = 'https://xss-callback.pwnfunction.repl.co/'
 
-// @ampproject/toolbox-optimizer/index.js
+/* @ampproject/toolbox-optimizer/index.js */
 async transformHtml(t, e) {
     const r = await i.parse(t);
     await this.transformTree(r, e);
     return i.serialize(r);
 }
 
-// `transformTree` eventually leads to the following
+/* `transformTree` eventually leads to the following */
 5690: (t, e, r) => {
     // ...
     class RewriteAmpUrls {
@@ -109,7 +109,7 @@ async transformHtml(t, e) {
 **Cause**
 
 ```js
-// next/server/render.tsx
+/* next/server/render.tsx */
 if ("redirect" in data && typeof data.redirect === "object") {
   checkRedirectValues(data.redirect, req, "getServerSideProps");
   data.props = {
@@ -136,7 +136,7 @@ if ("redirect" in data && typeof data.redirect === "object") {
 **Cause**
 
 ```js
-// next/server/render.tsx
+/* next/server/render.tsx */
 if ('notFound' in data && data.notFound) {
     if (pathname === '/404') {
         throw new Error(
