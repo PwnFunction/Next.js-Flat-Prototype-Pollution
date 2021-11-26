@@ -16,7 +16,7 @@ npm start
 
 ## Gadgets
 
-> Lot of unexplored surface. If you find anything send a pull request :)
+> Lot of unexplored surface. If you find any gadgets, send a pull request :)
 
 | Name                              | Description                                        | Type               | Package                         | Completed |
 | --------------------------------- | -------------------------------------------------- | ------------------ | ------------------------------- | :-------: |
