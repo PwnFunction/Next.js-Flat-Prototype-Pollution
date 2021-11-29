@@ -1,6 +1,6 @@
 # Next.js Flat Prototype Pollution
 
-A prototype pollution scenario in [Next.js](https://github.com/vercel/next.js/) when [flat:5.0.0](https://www.npmjs.com/package/flat) is used.
+A prototype pollution scenario in [Next.js](https://github.com/vercel/next.js/) when [flat](https://security.snyk.io/vuln/SNYK-JS-FLAT-596927) `5.0.0` is used.
 
 > Video goes here
 
@@ -157,3 +157,17 @@ if ('notFound' in data && data.notFound) {
     return null
 }
 ```
+
+# Resources
+
+- Prototype pollution attacks in NodeJS applications by Oliver Arteau
+  - Video: [Prototype pollution attacks in NodeJS applications](https://www.youtube.com/watch?v=LUsiFV3dsK8)
+  - Github: [Paper, Slides and Code](https://github.com/HoLyVieR/prototype-pollution-nsec18)
+- [Client-Side Prototype Pollution](https://github.com/BlackFan/client-side-prototype-pollution) by [Black2Fan](https://twitter.com/Black2Fan)
+- A tale of making internet pollution free
+  - Slides: [A tale of making internet pollution free](https://speakerdeck.com/s1r1us/a-tale-of-making-internet-pollution-free-bsides-ahmedabad-2021) by [s1r1us](https://twitter.com/S1r1u5_) and [Harsh Jaiswal](https://twitter.com/rootxharsh)
+  - Blog post: ["A tale of making internet pollution free" - Exploiting Client-Side Prototype Pollution in the wild](https://blog.s1r1us.ninja/research/PP)
+- [Exploiting prototype pollution – RCE in Kibana (CVE-2019-7609)](https://research.securitum.com/prototype-pollution-rce-kibana-cve-2019-7609/) by [Michał Bentkowski](https://twitter.com/SecurityMB)
+- Javascript prototype pollution by [Rahul Maini](https://twitter.com/iamnoooob) and [Harsh Jaiswal](https://twitter.com/rootxharsh)
+  - Video: [Part 1](https://www.youtube.com/watch?v=J3MIOIqvV8w)
+  - Video: [Part 2](https://www.youtube.com/watch?v=yDmOXhr8wmw)
