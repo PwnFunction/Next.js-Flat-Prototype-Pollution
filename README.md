@@ -62,7 +62,7 @@ const ampState = {
   hasQuery: Boolean(query.amp),
   hybrid: pageConfig.amp === "hybrid",
 };
-const inAmpMode = !process.browser && (0, _amp).isInAmpMode(ampState); // isInAmpMode() { return ampFirst || hybrid && hasQuery }
+const inAmpMode = !process.browser && (0, _amp).isInAmpMode(ampState); // isInAmpMode(ampState) { return ampState.ampFirst || ampState.hybrid && ampState.hasQuery }
 // ...
 html = await optimizeAmp(html, renderOpts.ampOptimizerConfig);
 ```

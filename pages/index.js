@@ -8,7 +8,7 @@ export default function Home({ msg }) {
         <title>Welcome</title>
       </Head>
 
-      <div style={{ padding: "10px 20px" }}>
+      <div style={{ padding: "5px 20px" }}>
         <p>👋 Hello from {msg}!</p>
         <li>
           <Link href="/vulnerable">
