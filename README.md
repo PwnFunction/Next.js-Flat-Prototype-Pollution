@@ -117,8 +117,6 @@ function Validator(e) {
 
 Persistent Cross-Site Scripting via `ampUrlPrefix` in `ampOptimizer.transformHtml`.
 
----
-
 Also a partial SSRF via `node-fetch` during AMP transform.
 
 **Poc**
