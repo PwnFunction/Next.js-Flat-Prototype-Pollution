@@ -14,6 +14,14 @@ npm run build
 npm start
 ```
 
+## Vulnerability
+
+[pages/vulnerable.js](./pages/vulnerable.js)
+
+```js
+const out = unflatten({ ...context.query });
+```
+
 ## Gadgets
 
 > Lot of unexplored surface. If you find any gadgets, send a pull request :)
@@ -32,6 +40,8 @@ npm start
 | Prisma                        |                                                    |                               |                                 |           |
 
 ## AMP RCE
+
+Remote code execution in `Validator` (uses `vm` module) via `validator`
 
 > Only on `dev` server - `npm run dev`
 
