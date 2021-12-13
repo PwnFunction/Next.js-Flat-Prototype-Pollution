@@ -2,7 +2,15 @@
 
 A prototype pollution scenario in [Next.js](https://github.com/vercel/next.js/) when [flat](https://security.snyk.io/vuln/SNYK-JS-FLAT-596927) `5.0.0` is used.
 
-> Video goes here
+## YouTube video
+
+<p align="center">
+  <a href='https://www.youtube.com/watch?v=XS_UMqQalLI'>
+    <img src="./public/thumb.png" alt="PwnFunction YouTube Video" width="800">
+  </a>
+</p>
+
+[✨ YouTube Video](https://www.youtube.com/watch?v=XS_UMqQalLI)
 
 ## Setup Instructions
 
